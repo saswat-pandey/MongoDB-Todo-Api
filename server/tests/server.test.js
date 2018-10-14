@@ -1,12 +1,21 @@
 const expect=require('expect');
 const request=require('supertest');
+const {ObjectID}=require('mongodb')
 
 const {app}= require('./../server.js')
 const{Todos}=require('./../models/Todo.js')
 
 const todos=[
-  {text:"Something to do 2"},
-  {text:"Something to do 3"}
+  {
+    _id:new ObjectID(),
+    text:"Something to do 2"
+
+  },
+  {
+    _id:new ObjectID(),
+    text:"Something to do 3"
+
+  }
 ];
 
 beforeEach((done)=>{
@@ -63,7 +72,6 @@ describe('Post/Todo',()=>{
 });
 
 describe('GET/todos',()=>{
-
 it("should get all todos",(done)=>{
 request(app)
 .get('/todos')
@@ -73,7 +81,32 @@ request(app)
 })
 .end(done);
 });
+});
 
+describe('GET/todo : id',()=>{
+it("should return the todo doc",(done)=>{
+request(app)
+.get(`/todos/${todos[0]._id.toHexString()}`)
+.expect(200)
+.expect((res)=>{
+  expect(res.body.todo.text).toBe(todos[0].text)
+})
+.end(done);
+});
 
+it("should return  404 if the todo user is not found",(done)=>{
+  var randId= new ObjectID();
+  request(app)
+  .get(`/todos/${randId.toHexString()}`)
+  .expect(404)
+  .end(done);
+});
+
+it("should return 404 for the non-object Id",(done)=>{
+  request(app)
+  .get(`/todos/123`)
+  .expect(400)
+  .end(done);
+});
 
 });
