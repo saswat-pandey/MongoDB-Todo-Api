@@ -41,14 +41,15 @@ describe('Post/Todo',()=>{
     .end((err,res)=>{
       if(err){
         return done(err);
-      }else{
+      }
+
         Todos.find().then((Todos)=>{
           expect(Todos.length).toBe(0);
           done();
         }).catch((err)=>{
           done(err);
-        })
-      }
+        });
+
     })
   })
 })
