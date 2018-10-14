@@ -4,8 +4,17 @@ const request=require('supertest');
 const {app}= require('./../server.js')
 const{Todos}=require('./../models/Todo.js')
 
+const todos=[
+  {text:"Something to do 2"},
+  {text:"Something to do 3"}
+];
+
 beforeEach((done)=>{
-  Todos.remove({}).then(()=>done());
+  Todos.remove({}).then(()=>{
+    return Todos.insertMany(todos);
+  }).then(()=>done()).catch((err)=>{
+    console.log(`An error has occured ${err}`);
+  });
 });
 
 describe('Post/Todo',()=>{
@@ -23,7 +32,7 @@ describe('Post/Todo',()=>{
       if (err) {
         return done(err);
       }else{
-        Todos.find().then((todos)=>{
+        Todos.find({text:'Test todo text'}).then((todos)=>{
           expect(todos.length).toBe(1);
           expect(todos[0].text).toBe(text);
           done();
@@ -42,7 +51,6 @@ describe('Post/Todo',()=>{
       if(err){
         return done(err);
       }
-
         Todos.find().then((Todos)=>{
           expect(Todos.length).toBe(0);
           done();
@@ -52,4 +60,20 @@ describe('Post/Todo',()=>{
 
     })
   })
+});
+
+describe('GET/todos',()=>{
+
+it("should get all todos",(done)=>{
+request(app)
+.get('/todos')
+.expect(200)
+.expect((res)=>{
+  expect(res.body.todo.length).toBe(2);
 })
+.end(done);
+});
+
+
+
+});
