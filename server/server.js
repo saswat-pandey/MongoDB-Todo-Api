@@ -6,6 +6,7 @@ const {ObjectId}=require('mongodb');
 var {Todos}=require('./models/Todo.js');
 var {Users}=require('./models/Users.js');
 
+const port=process.env.PORT || 3000;
 
 var app=express();
 
@@ -62,8 +63,8 @@ app.get('/todos/:id',(req,res)=>{
   }).catch((err)=>res.status(400).send());
 });
 
-app.listen(3000,()=>{
-  console.log('Started on Port 3000');
+app.listen(port,()=>{
+  console.log(`Started up in port:${port}`);
 });
 
 
