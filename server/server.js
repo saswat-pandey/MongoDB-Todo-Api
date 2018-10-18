@@ -1,15 +1,19 @@
+require('./config/config')
+
 const {mongoose}=require('./db/mongoose');
 const express= require('express');
 const bodyParser=require('body-parser')
 const {ObjectId}=require('mongodb');
+const _=require("lodash")
 
 var {Todos}=require('./models/Todo.js');
 var {Users}=require('./models/Users.js');
 
-const port=process.env.PORT || 3000;
+
 
 var app=express();
 
+const port=process.env.PORT;
 app.use(bodyParser.json());
 
 app.post('/todos',(request,response)=>{
@@ -63,10 +67,54 @@ app.get('/todos/:id',(req,res)=>{
   }).catch((err)=>res.status(400).send());
 });
 
+
+app.delete('/todos/:id',(req,res)=>{
+var id=req.params.id;
+if(!ObjectId.isValid(id)){
+return  res.status(404).send();
+}
+Todos.findByIdAndRemove(id).then((doc)=>{
+if(!doc){
+  return res.status(404).send();
+}
+  res.status(200).send({doc});
+}).catch((e)=>res.status(400).send())
+});
+
+app.patch('/todos/:id',(req,res)=>{
+  var id=req.params.id;
+  if(!ObjectId.isValid(id)){
+    return res.status(404).send();
+  }
+
+  var body=_.pick(req.body,['text','completed']);
+
+  if(_.isBoolean(body.completed) && body.completed){
+    body.completedAt= new Date(),getTime();
+  }else{
+    body.completed=false;
+    body.completedAt=null;
+  }
+console.log(`body::::::::::::${body}`);
+  Todos.findByIdAndUpdate(id,{
+    $set:{
+      text:body.text,
+      completed:body.completed,
+      completedAt:body.completedAt
+    }}).then((doc)=>{
+    if(!doc){
+      return res.status(404).send();
+    }
+    console.log(doc);
+    res.status(200).send({doc});
+  }).catch((e)=>{
+    res.status(400).send();
+  });
+});
+
 app.listen(port,()=>{
   console.log(`Started up in port:${port}`);
 });
-
 
 
 module.exports={
