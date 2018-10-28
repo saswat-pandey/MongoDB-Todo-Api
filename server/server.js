@@ -8,6 +8,7 @@ const _=require("lodash")
 
 var {Todos}=require('./models/Todo.js');
 var {Users}=require('./models/Users.js');
+var {authenticate}=require('./middleware/authenticate.js')
 
 
 
@@ -39,22 +40,26 @@ app.post('/users',(req,res)=>{
   user.save().then(()=>{
     return user.generateAuthToken();
   }).then((token)=>{
-    res.header('x-auth',token).send(user);
+    res.header('x-auth',token).send(user._id);
   }).catch((e)=>{
     res.status(404).send(e);
   });
 });
 
-app.get('/todos',(req,res)=>{
-  Todos.find().then((todo)=>{
+app.get('/users',(req,res)=>{
+  Users.find().then((user)=>{
     res.send({
-      todo:todo
+      user:user
     });
   },(err)=>{
     res.status(400).send(err);
   })
 });
 
+
+app.get('/users/me',authenticate,(req,res)=>{
+  res.send(req.user);
+});
 
 app.get('/users/:id',(req,res)=>{
   const id=req.params.id;
@@ -111,7 +116,6 @@ app.patch('/todos/:id',(req,res)=>{
     body.completed=false;
     body.completedAt=null;
   }
-console.log(`body::::::::::::${body}`);
   Todos.findByIdAndUpdate(id,{
     $set:{
       text:body.text,
