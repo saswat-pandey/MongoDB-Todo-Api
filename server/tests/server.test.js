@@ -4,32 +4,30 @@ const {ObjectID}=require('mongodb')
 
 const {app}= require('./../server.js')
 const{Todos}=require('./../models/Todo.js')
+// const{todos,populateTodos}=require('./seed/seed.js')
+
 
 const todos=[
   {
     _id:new ObjectID(),
     text:"Something to do 2"
-
   },
   {
     _id:new ObjectID(),
     text:"Something to do 3"
-
   }
 ];
 
 beforeEach((done)=>{
-  Todos.remove({}).then(()=>{
+  Todos.deleteMany({}).then(()=>{
     return Todos.insertMany(todos);
-  }).then(()=>done()).catch((err)=>{
-    console.log(`An error has occured ${err}`);
-  });
+  }).then(()=>done());
 });
 
 describe('Post/Todo',()=>{
-
   it('should create a new todo',(done)=>{
     var text='Test todo text';
+    console.log(`dsfffffffffffffffffffffffffffffffffffffffffffff`);
     request(app)
     .post('/todos')
     .send({text})
@@ -153,7 +151,7 @@ describe("Delete /todos/:id",()=>{
     });
 
     it("should return 404 if the objectId is not there",(done)=>{
-      const objId=new ObjectID();
+      const objId=new ObjectID();u
       request(app)
       .patch(`/todos/${objId.toHexString()}`)
       .expect(404)

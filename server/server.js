@@ -22,6 +22,7 @@ app.post('/todos',(request,response)=>{
     text:request.body.text
   })
   todo.save().then((docs)=>{
+    console.log(docs);
     response.send(docs);
   },(err)=>{
     console.log(`An Error has occured:${err}`);
@@ -43,6 +44,23 @@ app.post('/users',(req,res)=>{
     res.header('x-auth',token).send(user._id);
   }).catch((e)=>{
     res.status(404).send(e);
+  });
+});
+
+
+app.post('/users/login',(req,res)=>{
+  var body=_.pick(req.body,["email","password"]);
+  var user=new Users({
+    email:body.email,
+    password:body.password
+  });
+  Users.findByCredentials(user.email,user.password).then((user)=>{
+  return user.generateAuthToken().then((token)=>{
+    console.log(`akgdskjfdsalkjhfdsalkjhfdskjhfsdakhfdsakljfhsadlkjfhdsalkjfhdslkfasjhlfksdjah:::::::::${token}`);
+    res.header('x-auth',token).send(user)
+  });
+  }).catch((e)=>{
+    res.status(400).send(e);
   });
 });
 

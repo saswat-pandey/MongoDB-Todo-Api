@@ -44,6 +44,7 @@ userSchema.methods.toJSON= function (){
   return _.pick(user.toObject(),['email','password']);
 
 };
+
 userSchema.methods.generateAuthToken = function () {
   var user=this;
   var access= 'Auth';
@@ -52,7 +53,9 @@ userSchema.methods.generateAuthToken = function () {
     access,
     token
   }]);
+  console.log(`token:::::::::::::::::::::::::::::::::${user.tokens}`);
   user.save().then((docs)=>{
+    console.log(`docsLL:::::::::::::::::::::::::::::::::${docs}`);
     return token;
   })
 };
@@ -72,6 +75,28 @@ return User.findOne({
   });
 };
 
+
+userSchema.statics.findByCredentials=function(email,password){
+  var User=this;
+  return User.findOne({
+    "email":email
+  }).then((user)=>{
+    if(!user){
+      return Promise.reject();
+    }
+    return new Promise((resolve,reject)=>{
+      bcrypt.compare(password, user.password, (err, res)=> {
+        console.log(res);
+        if(res){
+         resolve(user);
+        }else{
+          reject();
+        }
+      });
+    });
+  })
+
+};
 
 userSchema.pre('save',function (next){
   var user=this;
